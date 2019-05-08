@@ -1,0 +1,6 @@
+int main (void)
+{
+    SystemCoreClockUpdate();  // 时钟初始化 
+	WatchDog_Initial();       // 看门狗初始化
+    vBootLoader(&vScene_Init,&vScene_Renew);  // BootLoader主程序
+}

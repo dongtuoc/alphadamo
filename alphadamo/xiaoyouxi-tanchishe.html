@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="baidu-site-verification" content="yi3BPGJT1k" />
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>贪吃蛇小游戏</title>
+<meta name="description" content="最精简的贪吃蛇C语言小游戏" />
+<link rel="stylesheet" type="text/css" href="mycss.css"/>
+</head>
+
+<body class="mainbody">
+<!-- head -->
+<div class="head-style">
+<ul id="nav-main">
+<li><a href="codehub.html" >CodeHub</a></li>
+<li><a href="http://www.alphadamo.com" >Home</a></li>
+<li><a href="dongtuocan.html" >Resume</a></li>
+<li><a href="cyuyan.html" >C/C++</a></li>
+<li><a href="ucos.html" >uC/OS</a></li>
+<li><a href="python.html" >Python</a></li>
+<li><a href="linux.html" >Linux</a></li>
+<li><a href="zanzhu/zanzhu.html" >Donation</a></li>
+</ul>
+<p class="logo">董拓灿的个人网站</p>
+</div>
+<!-- 左侧 -->
+<div class="div-left">
+	<p id="wenzi-left">↓扫描加好友↓</p>
+	<img src="wechat.jpg" alt=""></img>
+	<p id="wechatname">一个有料的公众号</p>
+	<img src="xym.jpg" alt=""></img>
+	<p id="wechatname">小姨妈的镜头</p>
+	<div id="div-left-ad">
+		<span class="tuijian">荐</span><a href="zhizhen.html">C语言与指针</a>
+		<span class="tuijian">荐</span><a href="bootloader.html">Bootloader原理</a>
+		<span class="tuijian">荐</span><a href="ruanjianpan.html">C语言软键盘</a>
+		<span class="tuijian">荐</span><a href="renwuqiehuan.html">uC/OS任务切换</a>
+		<span class="tuijian">荐</span><a href="zuoyongyu.html">代码作用域</a>
+		<span class="tuijian">荐</span><a href="jieshengram.html">教你节省RAM</a>
+		<span class="tuijian">荐</span><a href="fanbianyi.html">GCC-反编译</a>
+	</div>
+</div >
+
+<!-- ad -->
+<div id="div-ad">
+<span class="yuanchuang">原</span><a href="zixue.html">我是如何自学C语言和嵌入式的</a>
+<span class="yuanchuang">原</span><a href="bootloader.html">基于ARM Cortex-M0+内核的bootloader程序升级原理及代码解析</a>
+</div>
+<!--中间文章部分-->
+<div class="div-content">
+<p id="article-title"><b>贪吃蛇</b></p><!-- 标题 -->
+<p id="article-time">2018-07-04 作者：董拓灿</p>
+
+<div class="div-artical-main"> 
+<a href="tanchishe.exe" style="color: red;padding: 0px 0px 8px 0px;">点击此处下载贪吃蛇小游戏试玩！</a>
+<img style="padding-bottom:8px;"  src="snake1.jpg"></img>
+<p>贪吃蛇是一款曾经风靡一时的游戏，主要的原因是这个游戏的乐趣以及简单并富有挑战性的操作模式。</p>
+<p>我小的时候也喜欢玩，后来在学习C语言的过程中，因手头没有具体的项目来练手，突发奇想编写一个小游戏，选定了贪吃蛇，自己的思路是：第一，不参考任何网上的贪吃蛇设计思路，从框架到细节实现全按自己的想法来。第二，要能实现贪吃蛇的所有基本功能，包括转弯、撞墙、积分、死亡判定以及复活等等。</p>
+<p>贪吃蛇地图是很经典的地图布局，外围是围墙，中间是蛇的活动区域（这些区域包括自由点也就是上图的绿色区域、蛇本身区域），食物随机出现在自由点上，蛇根据玩家的按键进行上下左右的移动，移动需遵循物理规律，蛇头无法往蛇身和围墙方向移动，否则判定死亡。蛇每吃一个食物，蛇长度加<code>1</code>,直到最终胜利！</p>
+<p>在开始编码之前，有几个问题亟待解决。第一是如何判断画面中的每个点是蛇还是食物以及围墙。因此我设计了一个类型枚举宏，它定义为每个点的不同属性，整个地图中点的属性一共有以下几种：围墙，默认地图，蛇头，蛇身以及食物。在游戏运行时及时更新每个点的属性，每次移动时判断蛇头前方的点的属性以达到吃食物增长蛇身或者碰壁死亡的判定。</p>
+<p>另外一个需要设计的是如何高效快速的使蛇移动。最初的想法是设计蛇头蛇身和蛇尾，每次移动时根据吃到食物与否做不同的更新。如果移动一次蛇头前方是食物，那么食物自动更新为蛇头，原蛇头更新为蛇身，其余不变。如果移动一次蛇头前方是自由区域，那么就需要自由点更新为蛇头，蛇身按顺序前移覆盖原蛇头，最后一个蛇身更新为蛇尾，原蛇尾更新为自由点。这种方法比较复杂，实现起来很绕，实际运行中经常出BUG。于是后来抛弃了这种思路。在后来的实践中，发现蛇尾的存在很鸡肋，蛇只要有蛇头和蛇身即可，用一个变量记录蛇身的长度，即可根据数组来找到蛇尾和第一个蛇身。</p>
+<p>还有一个急需解决的问题是食物需要随机出现在地图中，并且不能出现在蛇身蛇头以及围墙的点上，解决方案是在一个循环中采用随机函数生成坐标，判断该坐标的属性，只有当属性不是以上几种时，才跳出循环，否则一直在循环中随机坐标。这种方式很容易相当也很容易实现，但是在运行时发现一个问题就是，当贪吃蛇自由活动空间越来越小时，程序并不能保证一次生成的坐标刚好为自由点，运气好时可能几个循环就随机到了自由点上，运气不好时有可能会很久才能随机到自由点上，这会造成游戏卡死在循环中，剩余的自由点越少，该现象越明显！在随后成品出来之后，我曾想办法去解决这个问题，但是由于当时时间不充裕，没有太多精力去做，就不了了之了，看这篇文章的同学可以去尝试一些好的算法实现随机食物一次必定生成在自由点上这个机制。</p>
+<p>解决了这几个问题，剩下的就是编码以及细节实现了，具体源代码请移步参看<a style="display: inline;" href="snake.txt">贪吃蛇的c语言源码</a>。</p>
+<p id="article-title2"><b>注意</b></p>
+<p>在<code>Windows</code>下利用C语言编程时，需要注意，我用的每个点视觉效果为正方形，实际上为长方形，也就是在屏幕中，一个中文字符（上图中的正方形五角星和圆均为中文字符）横坐标占<code>1</code>,纵坐标占<code>2</code>，实际编程时就会发现，也很好理解很好调试。</p>
+<p id="article-title2"><b>几个细节</b></p>
+<p>1. 贪吃蛇的蛇头为实心圆，蛇身为空心圆，便于区分，同时也为了美观。代码实现时在蛇头和蛇身更新时有区分。</p>
+<p>2. 贪吃蛇每移动一步，并不全部更新整个蛇身。因为蛇身一旦长起来后，更新整个蛇身会拖慢游戏运行速度。采取的策略是只更新蛇头和蛇尾，中间不变。</p>
+<p>3. 贪吃蛇撞到自己也会死亡！死亡后可重新开始新游戏！</p>
+<p>不足：正如上面所说，食物随机算法有待进一步优化。以后有时间我会找到一个合适的算法来更新代码。</p>
+
+<a href="xiaoyouxi-tanchishe.html">感谢看完本文，点击此处回到顶部</a>
+<a href="zanzhu/zanzhu.html" style="color:#ffffff; background-color:#0593D3;border-radius:3px;margin-bottom:8px;">您也可以点击此处对我进行小额赞助</a>
+
+
+</div>
+</div>
+<!--底部信息-->
+<div class="div-bottom">
+<ul id="nav-bottom">
+<li><a href="jianli.html" >关于作者</a></li>
+<li><a href="lianxizuozhe.html" >联系作者</a></li>
+<li><a href="http://www.aliyun.com" >阿里云</a></li>
+<li><a href="banbenxinxi.html" >版本信息</a></li>
+<li><a href="http://www.baidu.com" >追求精致程序技术,学无止境</a></li>
+<li><span class="bottom">Copyright &copy;2018 Alphadamo.com, All Rights Reserved,京ICP备18025699</span></li>
+</ul>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+void vBootLoader(void(* pfunSenceInitCallBack)(void), void (* pfunSenceRenewCallBack)(void))
+{
+    uint8_t ucMessage = 0;
+	unsigned int sp;
+	unsigned int pc;
+	uint16_t bootflag_read;
+
+	sp = APP_START_Flash;
+	pc = sp + 4;
+	
+    pfunSenceInitCallBack();  //初始化函数指针，具体函数怎么写这里不再赘述
+
+	while(1)
+	{
+		wdt_feed();
+		do{
+			ucMessage = u8UpdateMode();  // 此函数为升级主函数
+			if (UPDATE_OK == ucMessage)        /* 升级成功 */
+			{
+				memcpy(erase_pg_buf, bootflag_OK,    sizeof(bootflag_OK));
+				update_bootflag();
+				break;
+			} 
+			else if (UPDATE_NO == ucMessage)   /* 没有升级 */
+			{
+				break;
+			}
+			else                              /* 升级错误 */
+			{
+				memcpy(erase_pg_buf, bootflag_ERROR, sizeof(bootflag_ERROR));
+				update_bootflag();
+				break;
+			}		
+		} while (1);
+
+		bootflag_read = *( volatile uint16_t *)(BOOT_FLAG_ADDR);   /* 读取存放在bootflag地址的值 
+
+*/
+		
+		if (u8UserCodeEffect() == USERCODE_OK) // 代码判断
+		{
+			if (bootflag_read == 0xAA55)
+			{
+				pfunSenceRenewCallBack();  // 环境重置函数
+				vControlSwitch(sp,pc); // 跳转函数
+			}
+		}
+	}
+}

@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>我是如何从零学习C语言和嵌入式的</title>
+<link rel="stylesheet" type="text/css" href="mycss.css"/>
+</head>
+
+<body class="mainbody">
+<!-- head -->
+<div class="head-style">
+<ul id="nav-main">
+<li><a href="codehub.html" >CodeHub</a></li>
+<li><a href="http://www.alphadamo.com" >Home</a></li>
+<li><a href="dongtuocan.html" >Resume</a></li>
+<li><a href="cyuyan.html" >C/C++</a></li>
+<li><a href="ucos.html" >uC/OS</a></li>
+<li><a href="python.html" >Python</a></li>
+<li><a href="linux.html" >Linux</a></li>
+<li><a href="zanzhu/zanzhu.html" >Donation</a></li>
+</ul><p class="logo">董拓灿的个人网站</p>
+</div>
+<!-- 左侧 -->
+<div class="div-left">
+<p id="wenzi-left">↓扫描加好友↓</p>
+	<img src="wechat.jpg" alt=""></img>
+	<p id="wechatname">一个有料的公众号</p>
+	<img src="xym.jpg" alt=""></img>
+	<p id="wechatname">小姨妈的镜头</p>
+	<div id="div-left-ad">
+		<span class="tuijian">荐</span><a href="zhizhen.html">C语言与指针</a>
+		<span class="tuijian">荐</span><a href="bootloader.html">Bootloader原理</a>
+		<span class="tuijian">荐</span><a href="ruanjianpan.html">C语言软键盘</a>
+		<span class="tuijian">荐</span><a href="renwuqiehuan.html">uC/OS任务切换</a>
+		<span class="tuijian">荐</span><a href="zuoyongyu.html">代码作用域</a>
+		<span class="tuijian">荐</span><a href="jieshengram.html">教你节省RAM</a>
+		<span class="tuijian">荐</span><a href="fanbianyi.html">GCC-反编译</a>
+	</div>
+</div >
+
+<!-- ad -->
+<div id="div-ad">
+<span class="yuanchuang">原</span><a href="zixue.html">我是如何自学C语言和嵌入式的</a>
+<span class="yuanchuang">原</span><a href="bootloader.html">基于ARM Cortex-M0+内核的bootloader程序升级原理及代码解析</a>
+</div>
+<!--中间文章部分-->
+<div class="div-content">
+<!-- 以下为单独文章 -->
+<p id="article-title"><b>我是如何从零学习C语言和嵌入式的</b></p><!-- 标题 -->
+<p id="article-time">2018-06-19 作者：董拓灿</p>           <!-- 时间 -->
+	<div class="div-artical-main">
+	<p>非科班出身，目前从事嵌入式软件编程。本文简要介绍自己从零开始学习嵌入式的经历。</p>
+<p>大学本科时我学的是机械专业，当时大学会有一些和程序以及电路相关的课程，但是，和大多数的同学们一样，大学
+
+课程只是为了求个及格，并不了解真正的编程含义，甚至可以说，连编程的门都没有进，仅仅知道有<code>for(;;)</code>循环的存在。后来机缘巧合读了研究生，学的是无损检测技术，也非编程，但是会用到一些数据处理的程序，有
+
+时候的一些小的算法需要自己编写。但那时候用的多是<code>MATLAB</code>和<code>LabVIEW</code>这两个数值仿真软
+
+件，和嵌入式还是有天壤之别，相信工科的同学们都知道这两个软件，他有着强大的数据处理和运算能力，但是自己并
+
+不感兴趣，因为我在这个平台上做的最多的就是几行的数据处理语句，大多数的时间停留在做实验和获取实验数据上,所
+
+以,不管是本科还是研究生，自己对嵌入式的理解几乎为零，更别提对C语言的理解，仅仅停留在C语言必须要有一个
+
+<code>main()</code>作为起始语句这个层面。</p>
+<p>研究生毕业找工作时,同学们许多都找了对口的工作，有的去了国企，有的去了航天院，站在人生的十字路口，我也
+
+面临着抉择。</p>
+<p>机械行业的枯燥让我不想从事相关的工作，其实那时候最想去的是外企，虽然自己的英语不能说很好，但是至少六级
+
+过了，当时自己幻想的自己还是去一家外企。可是找了几家外企发现自己的能力达不到别人家的要求，最后作罢。当时
+
+给自己定的方向是，第一不找机械相关工作，第二找和编程相关工作，虽然自己当时的编程能力水平可以说不高，但是
+
+自己还是一门心思想往这个行业钻。后来机缘巧合投了一家做嵌入式软件开发的公司，面试的时候并没有针对技术做很
+
+强的面试，自己竟然顺利通过，而且公司给的待遇也很好，自己纠结了几天，最后欣然签约。毕业去了这家公司，随后
+
+便开始了一个门外汉在一家公司一遍学习一边做项目一边受鄙视的苦逼工作生涯。</p>
+<p>总结一句话，跨专业找工作有风险。要能抗压，也要能受鄙视。</p>
+<p>刚工作第一天，老同事扔给我一个项目工程，让我熟悉。花了半天的时间安装开发环境软件。记得当时同事问我，你
+
+电脑上有<code>IDE</code>么，我脑袋一蒙，<code>IDE</code>什么意思，但是自己没有好意思问，怕露怯。随口说了
+
+句没有。他说那等会我给你发一个，顺便把工程发给你你先熟悉一下。</p>
+<p>做回自己工位，打开百度，第一件事输入<code>IDE</code>什么意思。</p>
+<p>看到这，心里舒了一口气，原来就是开发程序的软件啊，这把我吓了一跳，要不要这么欺负新人？</p>
+<p>可见自己当时对于嵌入式的理解，完全为零。这之后，每次听到同事们说起一个新的名词，自己都会默默地记下来，
+
+然后找个时间去问度娘。多亏了百度，让我慢慢的明白了什么是内存泄漏、仲裁机制、上拉电阻、开漏输出、大小端存
+
+储、堆、栈等等等等的专有名词，自己也慢慢的有信心和同事们讨论代码及其运行机理。这是后话。</p>
+<p>打开项目工程的第一件事，自己便是浏览代码，天哪，这是天书啊！这都是啥意思？</p>
+<p>花了半个小时，找到了<code>main()</code>，可是为啥别的文件中也有个<code>main()</code>函数，不是说一个工
+
+程中只能有一个<code>main()</code>的么？</p>
+<p>看到<code>(void*)</code>这种代码，自己便开始怀疑自己大学学没学过C语言。</p>
+<p>看到<code>recive->buf</code>这种代码，自己开始怀疑自己选择嵌入式有没有错。</p>
+<p>看到<code>#pargam location = 0x00001000</code>这种代码，自己开始怀疑人生。</p>
+<p>对着电脑工程，苦逼学习了半个月，期间不停地问同事，指针什么意思，环形缓冲啥意思。刚开始事很耐心的讲解
+
+，后来同事不耐烦了，自己去去查吧！</p>
+<p>好，查就查，谁怕谁。</p>
+<p>一边学习项目背景，一边学习C语言知识，一边查资料。</p>
+<p>就这样，对嵌入式一窍不懂的我，跌跌撞撞奔着嵌入式的门走了过去，虽然已经现在也不敢说自己经入门，但是自
+
+己感觉已经比之前更有信心，面对不懂得东西也更加从容。</p>
+<p>算起来，从刚开始到现在，自己接触到的项目中，第一个是做纯应用程序的编写，实际上一小块代码，并不难，难得
+
+是项目背景的原理。对我影响最大的是后来学习并维护一款国产8位单片机的过程，以及在该单片机上编写BootLoader用
+
+于升级的经历，因为感觉正是这个过程，使自己真正触碰到了嵌入式的门槛，也正是因为有了这个经历，让我在后来的
+
+切换ARM内核编写BootLoader时特别有信心，而且事实证明，自己有信心是正确的。</p>
+<p>从零学习嵌入式这个项目，自己打算根据自己经历以及学习到的知识，以后慢慢扩充，在自己梳理知识的同时，希望也能帮助到其他人，毕竟从零学起不易。当然，自己毕竟经验和知识有限，所写内容不可避免出现纰漏，还望发现的童鞋积极指正，我们一起进步。</p>
+
+
+
+
+
+<a href="zixue.html">感谢看完本文，点击此处回到顶部</a>
+<a href="zanzhu/zanzhu.html" style="color:#ffffff; background-color:#0593D3;border-radius:3px;margin-bottom:8px;">您也可以点击此处对我进行小额赞助</a>
+	</div>
+</div>
+<!--底部信息-->
+<div class="div-bottom">
+<ul id="nav-bottom">
+<li><a href="jianli.html" >关于作者</a></li>
+<li><a href="lianxizuozhe.html" >联系作者</a></li>
+<li><a href="http://www.aliyun.com" >阿里云</a></li>
+<li><a href="banbenxinxi.html" >版本信息</a></li>
+<li><a href="http://www.baidu.com" >追求精致程序技术,学无止境</a></li>
+<li><span class="bottom">Copyright &copy;2018 Alphadamo.com, All Rights Reserved,京ICP备18025699</span></li>
+</ul>
+</div>
+
+</body>
+</html>

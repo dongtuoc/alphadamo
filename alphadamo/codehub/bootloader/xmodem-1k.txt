@@ -1,0 +1,203 @@
+/**********************************************************
+** Xmodem1k协议传输程序
+** 参  数: 	pfunPktHandle,: Xmodem1k协议传输所需函数结构体指针
+**          u16ShortDly:    轮询发送C字符的时间间隔
+**          u8LongDly:      等待传输开始超时时限
+** 返回值: 传输结果: 0--成功,1--升级失败(错误或取消升级),2--没有升级
+**********************************************************/
+uint8_t u8Xmodem1kClient(pFunPKTHAND pfunPktHandle, uint16_t  u16ShortDly, uint16_t u8LongDly)
+{
+    uint32_t u32ByteCnt   = 0;                                          /* 位计数器  计数一包的第几个字节数据   */
+    uint8_t  u8TimeoutCnt = 0;                                          /* 超时次数                             */
+    uint8_t  u8DataerrCnt = 0;                                          /* 数据错误次数                 		*/
+    uint8_t  u8PktIndex   = 1;                                          /* 包序号期望值                 		*/
+
+    uint8_t  u8STATE = STAT_IDLE_C;                                     /* 状态变量                     		*/
+    uint8_t  u8Data;                                                    /* 存放接收数据及发送命令       		*/
+    volatile uint16_t u16PktLen;                                        /* 包中有效数据的长度           		*/
+    uint8_t  u8Message;
+    
+    sysTimerClr(1);
+	
+    while (1)
+	{
+		wdt_feed();
+	  
+        switch (u8STATE)
+		{
+        case STAT_IDLE_C:                                               /* 轮询发C状态                  */
+           	 if (sysTimerGet(1) >= u8LongDly )
+			 {
+                u8STATE = STAT_TIMEOUT_C;                               /* 等待开始超时，跳到结束状态   */
+             } 
+			 else 
+			 {
+                u8Data = POLL;
+                do {
+						u8Message = UART_SendByte(u8Data);		
+               	   } while (u8Message == UART_NO_SPACE);
+				sysTimerClr(0);
+                u8STATE = STAT_IDLE_DATA;                               /* 跳到轮询读数状态             */
+           	 }
+             break;
+                    
+        case STAT_IDLE_DATA:                                            /* 轮询读数状态                 */
+			 if (UART_RecvByte(&u8Data) == UART_SUCCESS)
+			 {
+                u8STATE = STAT_CONNECT;                                 /* 接收到数据，跳到数据链接状态 */
+                sysTimerClr(0);
+             } 
+			 else
+			 {
+                if (sysTimerGet(0) >= (u16ShortDly * SECOND_PER_TICK))                   
+				{
+                    u8STATE = STAT_IDLE_C;                              /* 轮询读数超时，跳回轮询发C    */
+                }
+             }
+             break;
+
+        case STAT_CONNECT:                                              
+             if ((u8Data == SOH) || (u8Data == STX))					/* 数据连接状态   SOH--CRC128字节协议  STX--1k协议   */
+			 {
+                u16PktLen = (u8Data == SOH)? SHORTPKT_LEN : LONGPKT_LEN;
+                ((uint8_t *)ptHead)[u32ByteCnt] = u8Data;
+                u32ByteCnt++;
+                u8STATE = STAT_RECEIVE;                                 /* 连接成功，跳到数据接收状态   */
+                sysTimerClr(2);
+             } 
+			 else
+			 {
+                u8STATE = STAT_IDLE_C;                                  /* 起始控制字符错，跳回轮询发C  */
+             }
+             break;
+
+        case STAT_RECEIVE:                                               /* 数据接收状态                 */
+			 if (UART_RecvByte(&u8Data) == UART_SUCCESS) 
+			 {            
+                if (u32ByteCnt < PKT_HEAD_LEN) 
+				{
+                    ((uint8_t *)ptHead)[u32ByteCnt] = u8Data;           /* 控制字符、序号、序号补码     */
+                    if (ptHead->u8Ctrl == EOT)
+					{
+                        u8STATE = STAT_ACK;
+                        break;
+                    }
+                } 
+				else 
+				{
+                    ((uint8_t *)puData)[u32ByteCnt - 3] = u8Data;       /* 数据段部分(数据、CRC值)      */
+                }
+                u32ByteCnt++;
+				
+                if (u32ByteCnt >= u16PktLen + PKT_HEAD_LEN + 2)
+				{
+                    u8STATE = STAT_HANDLE;                              /* 包接收结束，跳到数据处理状态 */
+                }
+                u8TimeoutCnt = 0;
+                sysTimerClr(0);
+            } 
+			else
+			{                                                          /* 未收到数据，判断超时         */
+               /* 包间隔最大为1s,字符间隔最大为20ms, 根据包内部和包之间的不同选择不同的超时间隔 */
+               if (sysTimerGet(0) >= ((u32ByteCnt == 0) ? PKT_TIMEOUT_MS : CHAR_TIMEOUT_MS)) 
+               {
+                    sysTimerClr(0);
+                    u8TimeoutCnt++;
+                    u8STATE = STAT_NAK;
+               	}
+            }
+            break;    
+
+        case STAT_HANDLE:                                               /* 数据处理状态                 */
+        	{
+            uint16_t u16CRCTemp;
+			
+            if (ptHead->u8Ctrl != ((u16PktLen == SHORTPKT_LEN) ? SOH : STX))  /* 检查控制字符是否一致  */
+			{                                                         
+                u8DataerrCnt++;
+                u8STATE = STAT_NAK;
+                break;
+            }
+            if (ptHead->u8Index + ptHead->u8Patch != 0xFF)                    /* 检查序号、序号补码是否完整   */
+			{          
+                u8DataerrCnt++;
+                u8STATE = STAT_NAK;
+                break;
+            }
+            if ((ptHead->u8Index) == (u8PktIndex - 1))                 /* 检查序号是否为上一包序号， 数据重发的时候，检测是否为上一包序号 */
+            {
+            	u8STATE = STAT_ACK;
+                break;
+            }
+            if (ptHead->u8Index != u8PktIndex)                         /* 检查序号是否为期望的包序号   */
+            {
+            	u8DataerrCnt++;
+                u8STATE = STAT_NAK;
+                break;
+            }
+            u16CRCTemp = ((uint16_t)(*((uint8_t *)puData + u16PktLen)) << 8) | (*((uint8_t *)puData + u16PktLen + 1));
+            if (u16CRCVerify((uint8_t *)puData, u16PktLen, 0) != u16CRCTemp)
+			{
+                u8DataerrCnt++;
+                u8STATE = STAT_NAK;                                     /* CRC检查                      */
+                break;
+            }				
+            if (!pfunPktHandle((uint8_t *)puData, u16PktLen))   // 烧写flash的函数指针，具体怎么烧写查看芯片手册
+			{
+				u8PktIndex++;
+                u8STATE = STAT_ACK;                                     /* 数据处理                     */
+                break;
+            }
+            u8DataerrCnt++;
+            u8STATE = STAT_NAK;
+            break;
+       		}
+
+        case STAT_ACK:                                                  /* 正常响应状态(ACK)            */
+             u8Data = ACK;
+             do {
+                   u8Message = UART_SendByte(u8Data);
+                } while (u8Message == UART_NO_SPACE);
+			 
+             if (ptHead->u8Ctrl == EOT)                                 /* 结束控制符时进入ACK状态情况  */
+			 {                               
+                u8STATE = STAT_END;                                     /* 发送方发送EOT结束传输        */
+                break;
+             }
+             u8DataerrCnt = 0;
+             u32ByteCnt = 0;
+             u8STATE = STAT_RECEIVE;                                    /* 正常响应发送ACK后跳到数据接收*/
+             break;
+            
+        case STAT_NAK:                                                  /* 非正常响应状态(NAK)          */
+             if ((u8DataerrCnt >= 5) || (u8TimeoutCnt >= 5))            /* 发送错误次数或接收超时次数超过5次*/
+             {
+             	u8STATE = STAT_CAN;
+                break;
+             }
+             u8Data = NAK;
+             do {
+                   u8Message = UART_SendByte(u8Data);
+                } while (u8Message == UART_NO_SPACE);
+             u32ByteCnt = 0;
+             u8STATE = STAT_RECEIVE;
+             break;
+        
+        case STAT_CAN:                                                  /* 强制结束状态(CAN)            */
+             u8Data = CAN;
+             do {
+                  u8Message = UART_SendByte(u8Data);
+                } while (u8Message == UART_NO_SPACE);
+             return 1;
+            
+        case STAT_END:                                                  /* 传输结束状态(CAN)            */
+             return 0;
+
+		case STAT_TIMEOUT_C:
+			 return 2;
+
+        default:
+             break;
+        }
+    }
+}

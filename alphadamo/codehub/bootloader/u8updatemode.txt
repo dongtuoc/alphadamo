@@ -1,0 +1,26 @@
+
+static uint8_t u8UpdateMode(void)
+{
+   uint8_t ret;
+   
+   if (iap_prepare_sector(APP_START_SECTOR, APP_END_SECTOR) == CMD_SUCCESS) // 准备扇区
+	{
+      if (iap_erase_sector(APP_START_SECTOR, APP_END_SECTOR) == CMD_SUCCESS) // 擦除扇区
+     	 {
+            ret = u8Xmodem1kClient(ProgramFlash, (uint16_t)BOOT_DELAYTIME_C, (uint16_t)
+
+BOOT_WAITTIME_UPDATE);// 编程指针+X-Modem协议识别
+
+			if (0 == ret) 
+			{
+                return UPDATE_OK;// 返回标志
+            }
+			if (2 == ret)
+			{
+				return UPDATE_NO;
+			}
+			
+        }
+   }
+   return UPDATE_ERROR;
+}

@@ -1,0 +1,7 @@
+static void vControlSwitch(unsigned int sp,unsigned int pc)
+{
+  asm("ldr   r0, [r0]");
+  asm("mov   sp, r0");
+  asm("ldr   r0, [r1]");
+  asm("bx    r0");
+}
